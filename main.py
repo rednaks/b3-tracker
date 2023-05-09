@@ -57,7 +57,7 @@ def load_state(path: str = "./.state") -> State:
 
 def load_config() -> Config:
     try:
-        with open("./configa.json", "r") as fp:
+        with open("./config.json", "r") as fp:
             return Config(**json.load(fp))
     except FileNotFoundError as e:
         print(
