@@ -1,12 +1,13 @@
 import datetime
 import json
 import pickle
+import sys
 from enum import Enum
 from typing import List, Optional, Tuple
 
 import requests
 from bs4 import BeautifulSoup
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from pydantic.dataclasses import dataclass
 from pydantic.fields import Field
 
@@ -55,8 +56,18 @@ def load_state(path: str = "./.state") -> State:
 
 
 def load_config() -> Config:
-    with open("./config.json", "r") as fp:
-        return Config(**json.load(fp))
+    try:
+        with open("./configa.json", "r") as fp:
+            return Config(**json.load(fp))
+    except FileNotFoundError as e:
+        print(
+            "Config file not found, make sure you copy config.json.example to config.json and add your informations"
+        )
+        raise Exception from e
+
+    except ValidationError as e:
+        print("Invalid config.json file")
+        raise Exception from e
 
 
 def save_state(state: State, path: str = "./.state"):
@@ -128,7 +139,12 @@ if __name__ == "__main__":
         save_state(state)
         print(f"created new state : {state}")
 
-    config = load_config()
+    config = None
+    try:
+        config = load_config()
+    except Exception as e:
+        sys.exit(-1)
+
     try:
         response = get_b3_status(config)
     except Exception as e:
